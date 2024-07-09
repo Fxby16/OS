@@ -4,41 +4,30 @@
 %define ENDL 0x0D, 0x0A
 
 start:
-    mov [BOOT_DRIVE], dl    ; BIOS stores the boot drive in dl
-    
-    mov si, STARTING_MESSAGE
+    mov si, STARTING_MSG
     call puts
 
-    ; Set up the stack
-    mov ax, 0x7C00  
-    mov ss, ax              ; stack segment
-    mov sp, 0x8000          ; stack pointer
+    mov bp, 0x9000          ; base pointer
+    mov sp, bp              ; stack pointer
 
-    mov bx, 0x9000          ; disk read destination
-    mov dh, 5               ; sectors to read
-    mov dl, [BOOT_DRIVE]    ; boot drive
-    call disk_read
+    call switch_to_pm       ; should never return from here
 
-    mov dx, [0x9000]        ; print the first word read from the first sector
-    call hex_to_str
+    jmp $                   ; in case something goes wrong
 
-    mov si, HEX_OUT
-    call puts
+%include "includes/asm/puts.asm"
+%include "includes/asm/gdt.asm"
+%include "includes/asm/switch_to_pm.asm"
+%include "includes/asm/puts32.asm"
 
-    mov dx, [0x9000 + 512]  ; print the first word read from the second sector
-    call hex_to_str
-
-    mov si, HEX_OUT
-    call puts
+BEGIN_PM:
+    mov ebx, PROTECTED_MODE_MSG
+    call puts32
 
     jmp $
 
-%include "includes/asm/puts.asm"
-%include "includes/asm/hex_to_str.asm"
-%include "includes/asm/disk_read.asm"
-
 ; global variables
-STARTING_MESSAGE db "Booting OS", ENDL, 0
+STARTING_MSG db "Booting in 16 bits real mode", ENDL, 0
+PROTECTED_MODE_MSG db "Switched to 32 bits protected mode", ENDL, 0
 BOOT_DRIVE db 0
 
 times 510-($-$$) db 0           ; the program must be 512 bytes
