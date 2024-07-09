@@ -20,11 +20,11 @@ start:
 
     jmp $                   ; in case something goes wrong
 
-%include "includes/asm/disk_read.asm"
-%include "includes/asm/puts.asm"
+%include "include/asm/disk_read.asm"
+%include "include/asm/puts.asm"
 %include "bootloader/gdt.asm"
 %include "bootloader/switch_to_pm.asm"
-%include "includes/asm/puts32.asm"
+%include "include/asm/puts32.asm"
 
 [bits 16]
 

@@ -1,8 +1,13 @@
 ASM = nasm
+CC = gcc
+LD = ld
 
 all: build_dir image
 
 image: build/image.img
+
+DRIVERS := $(wildcard drivers/*.c)
+DRIVER_OBJS := $(patsubst drivers/%.c, build/%.o, $(DRIVERS))
 
 build/image.img: boot kernel
 	dd if=/dev/zero of=build/image.img bs=512 count=2880
@@ -16,16 +21,20 @@ build/boot.bin: bootloader/boot.asm
 
 kernel: build/kernel.bin
 
-build/kernel.bin: build/kernel_entry.o build/kernel.o 
-	ld -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary	# 32 bit for intel 386 architecture	
+build/kernel.bin: build/kernel_entry.o build/kernel.o $(DRIVER_OBJS)
+	$(LD) -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
 
 build/kernel_entry.o: kernel/kernel_entry.asm
-	$(ASM) -f elf32 -o $@ $<				 		# 32 bit
+	$(ASM) -f elf32 -o $@ $<
 
 build/kernel.o: kernel/kernel.c
-	gcc -fno-pie -ffreestanding -m32 -c $< -o $@	# no position independent code
-													# freestanding - no standard library
-													# 32 bit
+	$(CC) -fno-pie -ffreestanding -m32 -c $< -o $@
+
+$(DRIVER_OBJS): build/%.o : drivers/%.c
+	$(CC) -fno-pie -ffreestanding -m32 -c $< -o $@
 
 build_dir:
 	mkdir -p build
+
+clean:
+	rm -rf build

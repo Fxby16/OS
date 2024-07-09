@@ -1,8 +1,12 @@
-#define VIDEO_MEMORY 0xb8000
+#include "../drivers/include/screen.h"
 
 void main()
 {
-    char* video_memory = (char*) VIDEO_MEMORY;
+    clear_screen();
 
-    *video_memory = 'X';
+    print("Hello, World!\n");
+
+    print_at("Test print at", 10, 10);
+
+    print_char('X', 15, 0, WHITE_ON_BLACK);
 }
