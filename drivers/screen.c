@@ -1,15 +1,6 @@
+#include <memory.h>
+
 #include "include/screen.h"
-
-// private functions
-
-int get_screen_offset(int row, int col);
-int get_cursor();
-void set_cursor(int offset);
-void memory_copy(char *source, char *dest, int bytes_count);
-int handle_scrolling(int cursor_offset);
-
-void port_byte_out(unsigned short port, unsigned char data);
-unsigned char port_byte_in(unsigned short port);
 
 void print_char(char ch, int row, int col, char attribute_byte)
 {
@@ -22,7 +13,7 @@ void print_char(char ch, int row, int col, char attribute_byte)
     int offset;
     if(row >= 0 && col >= 0){   // if row and col are provided, calculate offset
         offset = get_screen_offset(row, col);
-    } else{                     // otherwise, use the current cursor position
+    }else{                      // otherwise, use the current cursor position
         offset = get_cursor();
     }
 
@@ -73,7 +64,7 @@ void set_cursor(int offset)
     port_byte_out(REG_SCREEN_DATA, (unsigned char) (offset & 0xff));
 }
 
-void print_at(char* message, int row, int col)
+void print_at(const char* message, int row, int col)
 {
     if(row >= 0 && col >= 0){
         set_cursor(get_screen_offset(row, col));
@@ -81,11 +72,12 @@ void print_at(char* message, int row, int col)
 
     int i = 0;
     while(message[i] != '\0'){
-        print_char(message[i++], row, col + i, WHITE_ON_BLACK);
+        print_char(message[i], row, ((col != -1) ? (col + i) : -1), WHITE_ON_BLACK);
+        i++;
     }
 }
 
-void print(char* message)
+void print(const char* message)
 {
     print_at(message, -1, -1);
 }
@@ -105,14 +97,6 @@ void clear_screen()
     set_cursor(get_screen_offset(0, 0));
 }
 
-void memory_copy(char* source, char* dest, int bytes_count)
-{
-    int i;
-    for(i = 0; i < bytes_count; i++){
-        *(dest + i) = *(source + i);
-    }
-}
-
 int handle_scrolling(int cursor_offset)
 {
     // if cursor offset is within the screen, return it
@@ -124,7 +108,7 @@ int handle_scrolling(int cursor_offset)
     
     // move all rows one row up
     for(i = 1; i < MAX_ROWS; i++){
-        memory_copy((char*) (get_screen_offset(i, 0) + VIDEO_ADDRESS), 
+        memcpy((char*) (get_screen_offset(i, 0) + VIDEO_ADDRESS), 
                     (char*) (get_screen_offset(i - 1, 0) + VIDEO_ADDRESS), 
                     MAX_COLS * CHARACTER_SIZE);
     }
@@ -141,18 +125,19 @@ int handle_scrolling(int cursor_offset)
     return cursor_offset;
 }
 
+
 // I/O functions
 
 // write data to a port
 void port_byte_out(unsigned short port, unsigned char data) {
-    asm volatile("outb %0, %1" : : "a"(data), "Nd"(port));
+    asm volatile("outb %0, %1" : : "a"(data), "Nd"(port)); // put data in al, port in dx
 }
 
 // read data from a port
 unsigned char port_byte_in(unsigned short port) {
     unsigned char result;
     asm volatile("inb %1, %0"
-                 : "=a"(result)
-                 : "Nd"(port));
+                 : "=a"(result)     // result in al
+                 : "Nd"(port));     // port in dx
     return result;
 }
