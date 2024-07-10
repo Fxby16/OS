@@ -100,6 +100,11 @@ void putchar(char ch)
 void print_dec(int num, int width)
 {
     char str[15];
+    int neg = num < 0;
+
+    if(neg){
+        num = -num;
+    }
 
     memset(str, 0, sizeof(str));
 
@@ -112,6 +117,11 @@ void print_dec(int num, int width)
 
     if(i == 0){
         str[i] = '0';
+        i++;
+    }
+
+    if(neg){
+        str[i] = '-';
         i++;
     }
 
