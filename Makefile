@@ -34,7 +34,7 @@ build/boot.bin: bootloader/boot.asm
 kernel: build/kernel.bin
 
 build/kernel.bin: build/kernel_entry.o  $(DRIVER_OBJS) $(LIBC_OBJS) $(KERNEL_C_OBJS) $(KERNEL_ASM_OBJS) 
-	$(LD) $(LDFLAGS) -Ttext 0x1000  -o $@ $^
+	$(LD) $(LDFLAGS) -T linker.ld  -o $@ $^
 
 build/kernel_entry.o: kernel/kernel_entry.asm
 	$(ASM) $(ASMFLAGS) -o $@ $<

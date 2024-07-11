@@ -5,15 +5,16 @@
 [bits 32]
 [extern _start]
 
-mov ebx, CALLING_KERNEL_MSG
-call puts32
+kernel_entry:
+    mov ebx, CALLING_KERNEL_MSG
+    call puts32
 
-call _start
+    call _start
 
-mov ebx, RETURNED_FROM_KERNEL_MSG
-call puts32
+    mov ebx, RETURNED_FROM_KERNEL_MSG
+    call puts32
 
-jmp $
+    jmp $
 
 %include "include/asm/puts32.asm"
 CALLING_KERNEL_MSG db "Calling the kernel...", ENDL, 0
