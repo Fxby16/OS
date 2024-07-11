@@ -33,7 +33,7 @@ load_kernel:
     call puts
 
     mov bx, KERNEL_OFFSET
-    mov dh, 15              ; number of sectors to read
+    mov dh, 50              ; number of sectors to read (50 * 512 = 25KB)
     mov dl, [BOOT_DRIVE]
     call disk_read
 

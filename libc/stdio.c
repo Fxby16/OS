@@ -13,6 +13,7 @@ enum PRINTF_STATE{
 void puts(const char* str);
 void putchar(char ch);
 void print_dec(int num, int width);
+void print_udec(unsigned int num, int width);
 void print_hex(int num);
 
 // flags not implemented
@@ -54,6 +55,9 @@ void printf(const char* str, ...)
                             break;
                         case 'd':
                             print_dec(va_arg(args, int), width);
+                            break;
+                        case 'u':
+                            print_udec(va_arg(args, unsigned int), width);
                             break;
                         case 's':
                             str_ptr = va_arg(args, char*);
@@ -122,6 +126,34 @@ void print_dec(int num, int width)
 
     if(neg){
         str[i] = '-';
+        i++;
+    }
+
+    for(int j = 0; j < max(0, width - i); j++){ // pad until minimum width is reached
+        putchar(' ');
+    }
+
+    while(i){
+        i--;
+        putchar(str[i]);
+    }
+}
+
+void print_udec(unsigned int num, int width)
+{
+    char str[15];
+
+    memset(str, 0, sizeof(str));
+
+    int i = 0;
+    while(num){
+        str[i] = num % 10 + '0';
+        num /= 10;
+        i++;
+    }
+
+    if(i == 0){
+        str[i] = '0';
         i++;
     }
 

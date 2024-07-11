@@ -1,6 +1,7 @@
 #include <memory.h>
 
 #include "include/screen.h"
+#include "../kernel/ports_io.h"
 
 void print_char(char ch, int row, int col, char attribute_byte)
 {
@@ -72,7 +73,7 @@ void print_at(const char* message, int row, int col)
 
     int i = 0;
     while(message[i] != '\0'){
-        print_char(message[i], row, ((col != -1) ? (col + i) : -1), WHITE_ON_BLACK);
+        print_char(message[i], row, col + i, WHITE_ON_BLACK);
         i++;
     }
 }
@@ -108,8 +109,8 @@ int handle_scrolling(int cursor_offset)
     
     // move all rows one row up
     for(i = 1; i < MAX_ROWS; i++){
-        memcpy((char*) (get_screen_offset(i, 0) + VIDEO_ADDRESS), 
-                    (char*) (get_screen_offset(i - 1, 0) + VIDEO_ADDRESS), 
+        memcpy((char*) (get_screen_offset(i - 1, 0) + VIDEO_ADDRESS), 
+               (char*) (get_screen_offset(i, 0) + VIDEO_ADDRESS), 
                     MAX_COLS * CHARACTER_SIZE);
     }
 
@@ -123,21 +124,4 @@ int handle_scrolling(int cursor_offset)
     cursor_offset -= CHARACTER_SIZE * MAX_COLS;
 
     return cursor_offset;
-}
-
-
-// I/O functions
-
-// write data to a port
-void port_byte_out(unsigned short port, unsigned char data) {
-    asm volatile("outb %0, %1" : : "a"(data), "Nd"(port)); // put data in al, port in dx
-}
-
-// read data from a port
-unsigned char port_byte_in(unsigned short port) {
-    unsigned char result;
-    asm volatile("inb %1, %0"
-                 : "=a"(result)     // result in al
-                 : "Nd"(port));     // port in dx
-    return result;
 }

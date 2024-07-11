@@ -1,3 +1,5 @@
+[bits 16]
+
 ; GDT (Global Descriptor Table)
 gdt_start:                  ; the mandatory null descriptor
     dd 0x0                  ; dd = define double word (4 bytes)
