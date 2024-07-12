@@ -35,6 +35,9 @@ extern void idt_flush(uint32_t idt_address);
 extern void idt_init();
 void idt_set_gate(uint8_t num, void* base, uint16_t selector, uint8_t flags);
 
+void irq_set_handler(int irq, void (*handler)(struct interrupt_registers* regs));
+void irq_unset_handler(int irq);
+
 extern void isr0();
 extern void isr1();
 extern void isr2();

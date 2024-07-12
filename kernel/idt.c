@@ -1,5 +1,5 @@
-#include "idt.h"
-#include "ports_io.h"
+#include "include/idt.h"
+#include "include/ports_io.h"
 #include <memory.h>
 #include <stdio.h>
 
@@ -191,8 +191,8 @@ void irq_handler(struct interrupt_registers* regs)
     }
 
     if(regs->int_no >= 40){
-        port_byte_out(0xA0, 0x20); // Send EOI to slave PIC
+        port_byte_out(0xA0, 0x20); // Send end of interrupt to slave PIC
     }
 
-    port_byte_out(0x20, 0x20); // Send EOI to master PIC
+    port_byte_out(0x20, 0x20); // Send end of interrupt to master PIC
 }

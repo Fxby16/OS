@@ -1,7 +1,7 @@
 #include <memory.h>
 
 #include "include/screen.h"
-#include "../kernel/ports_io.h"
+#include "../kernel/include/ports_io.h"
 
 void print_char(char ch, int row, int col, char attribute_byte)
 {
@@ -124,4 +124,18 @@ int handle_scrolling(int cursor_offset)
     cursor_offset -= CHARACTER_SIZE * MAX_COLS;
 
     return cursor_offset;
+}
+
+void delete_last_char()
+{
+    int offset = get_cursor() - CHARACTER_SIZE;
+ 
+    if(offset <= 0){
+        return;
+    }
+ 
+    unsigned char* vidmem = (unsigned char*) VIDEO_ADDRESS;
+    vidmem[offset] = ' ';
+    vidmem[offset + 1] = WHITE_ON_BLACK;
+    set_cursor(offset);
 }

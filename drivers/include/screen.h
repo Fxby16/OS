@@ -22,5 +22,6 @@ extern void print_at(const char* message, int row, int col);
 extern void print(const char* message);
 
 extern void clear_screen();
+extern void delete_last_char();
 
 #endif

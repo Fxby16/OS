@@ -1,5 +1,7 @@
 #include "../drivers/include/screen.h"
-#include "idt.h"
+#include "include/idt.h"
+#include "include/ports_io.h"
+#include "../drivers/include/keyboard.h"
 #include <stdio.h>
 #include <stdint.h>
 
@@ -37,25 +39,31 @@ void trigger_device_not_available() {
     );
 }
 
+void key_handler(struct keyboard_key* key, uint8_t flags)
+{
+    if(!key){
+        return;
+    }
+
+    if((key->ascii >= 32 && key->ascii <= 126) || key->ascii == '\n' || key->ascii == '\t'){
+        if((flags & SHIFT_DOWN) || (flags & CAPS_LOCK)){
+            putchar(key->shift_ascii);
+        }else{
+            putchar(key->ascii);
+        }
+    }
+
+    if(key->ascii == 8){ // backspace
+        delete_last_char();
+    }
+}
+
 void _start()
 {
     clear_screen();
-    printf("Initializing the IDT\n");
     idt_init();
-    printf("IDT initialized\n");
 
-    puts("Writing with puts() in kernel.c");
-    printf("Writing with printf() in kernel.c\n");
-    printf("Printing a number: %d\n", -42);
-    printf("Printing a number with width 5: %5d\n", 42);
-    printf("Printing a number with width 3: %3d\n", 42);
-    printf("Printing a hex number: %x\n", 0x42);
-    printf("Printing an unsigned number: %u\n", UINT32_MAX);
-    printf("Printing a string: %s\n", "Hello, World!");
-    printf("Printing a string: %13s\n", "Test");
-    printf("Printing a character: %c\n", 'A');
-
-    trigger_divide_by_zero();
+    set_keyboard_handler(key_handler);
 
     while(1);
 }

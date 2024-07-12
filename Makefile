@@ -11,8 +11,8 @@ all: build_dir image
 image: build/image.img
 
 DRIVERS := $(wildcard drivers/*.c)
-KERNEL_C := $(wildcard kernel/*.c)
-KERNEL_ASM := $(wildcard kernel/*.asm)
+KERNEL_C := $(shell find kernel/ -type f -name '*.c')
+KERNEL_ASM := $(shell find kernel/ -type f -name '*.asm')
 KERNEL_ASM := $(filter-out kernel/kernel_entry.asm, $(KERNEL_ASM))
 LIBC := $(wildcard libc/*.c)
 
